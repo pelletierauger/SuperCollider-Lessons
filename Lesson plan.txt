@@ -1,0 +1,15 @@
+SuperCollider lesson plan
+
+- Introduction to the language and the client-server structure.
+- Creating basic synthesizers.
+- Composing patterns with synthesizers and the pattern library.
+- Envelopes and multichannel expansion.
+- Methods of synthesis : 
+  - Additive synthesis.
+  - Substractive synthesis.
+  - Frequency modulation (FM).
+  - Sampling (working with sound files and buffers).
+  - Granular synthesis.
+  - Modal synthesis (physical modeling).
+- Clocks and event scheduling.
+- Strategies for composing and performing complete pieces.
