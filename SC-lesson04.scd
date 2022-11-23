@@ -1,11 +1,13 @@
 // Multichannel expansion -> this leads to Additive synthesis
 // Splay, sum.
 // Iterating over arrays: do, sum, collect.
-// Array methods like .reverse, .mirror, .mirror2.
+// (no operator precedence)
+// Array methods like .reverse, .mirror, .mirror2, .wrapExtend, .stutter(), .rotate()
+// .scramble
 
 s.meter;
 s.plotTree;
-// Busses (reverb)
+// Busses (reverb), Nodes, Groups, Order of execution
 // Clocks
 
 // Basics of filtering - Substractive synthesis
