@@ -1,18 +1,7 @@
-// Multichannel expansion -> this leads to Additive synthesis
-// Splay, sum.
-// Iterating over arrays: do, sum, collect.
-// (no operator precedence)
-// Array methods like .reverse, .mirror, .mirror2, .wrapExtend, .stutter(), .rotate()
-// .scramble
+// -----------------------------------------------------------------------------
+// 4A: Busses
+// -----------------------------------------------------------------------------
 
-s.meter;
-s.plotTree;
-// Busses (reverb), Nodes, Groups, Order of execution
-// Clocks
-
-// Basics of filtering - Substractive synthesis
-// LPF, HPF, BPF,
-// Delay based filters (Comb, Delay)
 
 ~reverbBus = Bus.audio(s, 2);
 

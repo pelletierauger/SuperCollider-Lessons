@@ -123,7 +123,28 @@ Lesson No. 4 --- The Expanding Universe
 
 
 // -----------------------------------------------------------------------------
-// 4B: Array methods
+// 4B: What to do with more than 2 channels ?
+// -----------------------------------------------------------------------------
+
+// Summing arrays and arrays containing signals
+
+[0, 1, 2].sum
+
+// Summing signals with .sum
+{SinOsc.ar(400 + ((0..10)/2)).sum * 0.1 ! 2}.play;
+
+// Look at the effect of summing up those signals.
+s.scope;
+
+// Instead of summing up the signals, you can
+// distribute all of them evenly across the stereo space.
+{Splay.ar(SinOsc.ar(400 + ((0..10)/2))) * 0.1}.play;
+
+// Multichannel signals can also be used to create music designed for large arrays
+// of speakers.
+
+// -----------------------------------------------------------------------------
+// 4C: Array methods
 // -----------------------------------------------------------------------------
 
 
@@ -137,16 +158,6 @@ Lesson No. 4 --- The Expanding Universe
 
 [0, 1, 2, [3, 4, 5]].flat
 
-// Summing arrays and arrays containing signals
-
-[0, 1, 2].sum
-
-// Summing signals with .sum
-{SinOsc.ar(400 + ((0..10)/2)).sum * 0.1 ! 2}.play;
-
-FreqScope.new();
-s.scope;
-
 // .reverse, .mirror, .mirror2, scramble, .wrapExtend(), .stutter(), .rotate()
 
 [1, 2, 3].reverse;
@@ -159,7 +170,7 @@ s.scope;
 
 
 // -----------------------------------------------------------------------------
-// 4C: Iterating over arrays: do, collect, for.
+// 4D: Iterating over arrays: do, collect, for.
 // -----------------------------------------------------------------------------
 
 
@@ -181,7 +192,7 @@ a;
 
 
 // -----------------------------------------------------------------------------
-// Additive Synthesis
+// 4E: Additive Synthesis
 // -----------------------------------------------------------------------------
 
 
@@ -236,17 +247,51 @@ f.freqscope;
 s.scope(zoom: 220.reciprocal * 64 * 16 * 1.00915);
 )
 
+
+// -----------------------------------------------------------------------------
+// 4F: Busses
+// -----------------------------------------------------------------------------
+
+
+~reverbBus = Bus.audio(s, 2);
+
 (
+~verb.free;
+~verb = {
+    var x = MouseX.kr(-1, 1);
+    var input = In.ar(~reverbBus, 2);
+    var reverb = JPverb.ar(input, 5);
+    var sig = XFade2.ar(input, reverb, x);
+    sig;
+}.play;
+)
+
 (
-f = {
-    ({arg i;
-        var x = MouseX.kr(0, 15);
-        var xa = K2A.ar(x);
-        var xx = K2A.ar(i);
-        var j = i * 2 + 1;
-        var sig = SinOsc.ar(220 * j, pi/2) * 0.7/j.squared;
-        Select.ar(xa > xx, [sig * 0.001, sig]);
-    } ! 15).sum // we sum this function 15 times
-    ! 2 }; // and we make it a stereo signal
-f.scope;
+SynthDef.new(\tri, {
+    arg freq = 54, atk = 0.1, dec = 0.1, sustime = 0.8, suslevel = 0.5, rel = 2,
+    amp = 1, pan = 0, lfoFreq = 3;
+    var env = Env.new([0, 1, suslevel, suslevel, 0], [atk, dec, sustime, rel]);
+    var envSig = EnvGen.ar(env, doneAction: 2);
+    var lfo = SinOsc.kr(lfoFreq).unipolar;
+    var sig = LFTri.ar(freq.midicps) * envSig * amp * lfo;
+    sig = Pan2.ar(sig, pan);
+    Out.ar(~reverbBus, sig);
+}).add;
+)
+
+(
+~melody.stop;
+~melody = Pbind(
+    \instrument, \tri,
+    \dur, Prand([0.25, 0.5, 0.75, 1, 1.5], inf),
+    \freq, ~toMidi.("Gb3") + Prand(Scale.lydian.degrees, inf) + Prand([-12, 0, 12], inf),
+    \atk, 0.001,
+    \dec, 0.05,
+    \sustime, 0,
+    \suslevel, 0.5,
+    \rel, 0.05,
+    \amp, 0.5,
+    \pan, Pwhite(-1.0, 1.0, inf),
+    \lfoFreq, Prand([1, 2, 3, 4, 6, 8, 9, 12, 16] / 3, inf)
+).play();
 )
