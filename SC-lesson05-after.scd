@@ -1,8 +1,7 @@
 ░░░░▒▒▒▒▒▒▓▓▓▓█████        SuperCollider Course        █████▓▓▓▓▒▒▒▒▒▒░░░░
 ░░░░▒▒▒▒▒▒▓▓▓▓█████      Fall 2022 - Winter 2023       █████▓▓▓▓▒▒▒▒▒▒░░░░
-░░░░▒▒▒▒▒▒▓▓▓▓█████                                    █████▓▓▓▓▒▒▒▒▒▒░░░░
-░░░░▒▒▒▒▒▒▓▓▓▓█████     SuperCollider as a Howling     █████▓▓▓▓▒▒▒▒▒▒░░░░
-░░░░▒▒▒▒▒▒▓▓▓▓█████      Celestial Wind that Sings     █████▓▓▓▓▒▒▒▒▒▒░░░░
+░░░░▒▒▒▒▒▒▓▓▓▓█████     SuperCollider As a Howling     █████▓▓▓▓▒▒▒▒▒▒░░░░
+░░░░▒▒▒▒▒▒▓▓▓▓█████      Celestial Wind That Sings     █████▓▓▓▓▒▒▒▒▒▒░░░░
 ░░░░▒▒▒▒▒▒▓▓▓▓█████     Throughout the Cosmos and      █████▓▓▓▓▒▒▒▒▒▒░░░░
 ░░░░▒▒▒▒▒▒▓▓▓▓█████      Binds Together all Souls.     █████▓▓▓▓▒▒▒▒▒▒░░░░
 
@@ -19,7 +18,7 @@ Lesson No. 5 --- Substractive Synthesis
 
 // LPF, Low Pass Filter
 // HPF, High Pass Filter
-// BPF, Band Pass Filter
+// BPF, High Pass Filter
 // ********EXTREMELY IMPORTANT****** :
 // The freq value within LPF and HPF must NEVER approach zero.
 // From the documentation:
@@ -40,7 +39,7 @@ Lesson No. 5 --- Substractive Synthesis
 {
     var x = MouseX.kr(0, 1);
     var sig = WhiteNoise.ar() * 0.1;
-    var lowPass = LPF.ar(sig, 15000 * x + 50);
+    var lowPass = BPF.ar(sig, 15000 * x + 50);
     lowPass ! 2;
 }.freqscope;
 )
@@ -55,10 +54,11 @@ Lesson No. 5 --- Substractive Synthesis
     var x = MouseX.kr(0, 1);
     var y = 1 - MouseY.kr(0, 1);
     var sig = LFSaw.ar(440) * 0.1;
-    var lowPass = RLPF.ar(sig, 10440 * x + 50, y);
+    var lowPass = RHPF.ar(sig, 10440 * x + 50, y);
     lowPass ! 2;
 }.freqscope;
 )
+
 
 // VadimFilter, a nice sounding filter.
 (
@@ -67,7 +67,7 @@ Lesson No. 5 --- Substractive Synthesis
     var y = MouseY.kr(0, 1);
     var sig = LFSaw.ar(440) * 0.1;
     var lowPass = VadimFilter.ar(sig, 10440 * x + 50, y);
-    lowPass ! 2;
+    lowPass ! 2 * 8;
 }.freqscope;
 )
 
@@ -92,14 +92,23 @@ Lesson No. 5 --- Substractive Synthesis
 // Filtering the high frequency energy as you scale down the amplitude,
 // to simulate the behaviour of acoustic sounds.
 (
+var notes = Scale.major.degrees.wrapExtend(21) + [0, 12, 24].stutter(7);
+var note = notes.choose;
+var cutoff = note.linexp(0, 35, 50, 20000);
+var release = note.linexp(0, 35, 10, 1);
 {
     var x = MouseX.kr(0, 1);
-    var e = EnvGen.kr(Env.perc(releaseTime: 1.5), doneAction: 2);
-    var sig = LFSaw.ar(440) * 0.1;
-    var lowPass = LPF.ar(sig, 15000 * e + 50);
+    var e = EnvGen.kr(Env.perc(releaseTime: release), doneAction: 2);
+    var lfo = SinOsc.kr(6).unipolar * 550;
+    var sig = LFSaw.ar(~toFreq.("E2") * note.midiratio) * 0.1;
+    var lowPass = LPF.ar(sig, cutoff * e + 5 + lfo);
     lowPass ! 2 * e;
 }.play;
+cutoff.postln;
 )
+
+440 * 2.pow(7/12);
+440 * 7.midiratio;
 
 // When the high frequencies are not filtered away as the amplitude falls,
 // a different effect is achieved. It sounds less warm and natural, but it
