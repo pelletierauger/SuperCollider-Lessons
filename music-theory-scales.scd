@@ -1,4 +1,23 @@
-What is a scale?
+
+// -----------------------------------------------------------------------------
+// Consonance and dissonance
+// -----------------------------------------------------------------------------
+
+{LFTri.ar(440) * 0.1 ! 2}.play;
+{LFTri.ar(440 * 1.5) * 0.1 ! 2}.play;
+{LFTri.ar(440 * 1.25) * 0.1 ! 2}.play;
+
+440 * 2.pow(4/12);
+440 * 4.midiratio;
+440 * 1.25;
+
+{LFTri.ar(440) * 0.1 ! 2}.play;
+{LFTri.ar(440 * 7.midiratio) * 0.1 ! 2}.play;
+{LFTri.ar(440 * 4.midiratio) * 0.1 ! 2}.play;
+
+// -----------------------------------------------------------------------------
+// What is a scale? How do we build one?
+// -----------------------------------------------------------------------------
 
 Scale.major.degrees;
 [ 0, 2, 4, 5, 7, 9, 11 ];
@@ -32,18 +51,29 @@ Scale.phrygian.degrees;
 ~makeScale.([-5, 2]);  // Aeolian (Natural Minor)
 ~makeScale.([-6, 1]);  // Locrian
 
+~scale.asString
+var ss = ""; ~scale.do({|item|ss=ss++item.asString.padRight(4, ".")});ss;
 (
 var key = ~toMidi.("C4");
 var noteIndex = Pseq((0..7), inf).asStream;
-~pianoRiff2.stop;
-~pianoRiff2 = Pbind(
+~arpeggiatingTheScale.stop;
+~arpeggiatingTheScale = Pbind(
     \type, \pianoEvent,
     \dur, 0.5,
-    \num, key + FuncStream({~scale[noteIndex.next]}),
+    \num, key + FuncStream({
+        var scst = "";
+        var nn = noteIndex.next;
+        var n = ~scale[nn];
+        12.do({"".postln});
+        (n).asString.padLeft(nn*4+(n.asString.size), " ").postln;
+        ~scale.do({|item|scst=scst++item.asString.padRight(4, ".")});
+        scst.postln;
+        n;
+        }),
     \dyn, Pseq([1, 1], inf),
     \amp, Pseq([0.5, 0.125] * 0.5, inf),
     \pan, Pwhite(-0.75, 0.75, inf),
-    \rel, 4
+    \rel, 2
 ).play(quant: [2]);
 )
 

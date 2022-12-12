@@ -1,21 +1,33 @@
 
 
+
+   ░█░█░░█░█░█░░█░█░░█░█░█░
+   c d ef g a bc d ef g a b
+c  x...x..x
+d    x..x...x
+e      x..x...x
+f       x...x..x
+g         x...x..x
+a           x..x...x
+b             x..x...x
+
+
 ~scale;
 ~two_oct = ~scale[0..6] ++ (~scale[0..6]+12);
 ~two_oct[0,2..4]
+
 var a = 1; ~chord = ~two_oct[a+0,a+2..a+4];
-~chords = Array.new(7);
-~chords = []; 7.do({|i| ~chords = ~chords.add(~two_oct[i+0,i+2..i+4])});
-~chords;
-~chord;
+
+~chords = []; 7.do({|i| ~chords = ~chords.add(~two_oct[i+0,i+2..i+4])}); ~chords;
 
 (
 var key = ~toMidi.("C4");
-// r must be a positive integer.
-var r = 1;
-var noteIndex = Pseq((0..(21*r-1)), inf).asStream;
+var repeats = 1; // repeats must be a positive integer.
+var transpositions = [0].stutter(3);
+var noteIndex = Pseq((0..(21*repeats-1)), inf).asStream;
 var keyIndex = Pseq((0..6), inf).asStream;
 var arpeggio = 0.025;
+var r = repeats;
 ~ascendingChords.stop;
 ~ascendingChords = Pbind(
     \type, \pianoEvent,
@@ -32,7 +44,7 @@ var arpeggio = 0.025;
             name = ("Chord " ++ name).padRight(pad, string: " ");
             if (n % (3*r) == 0, {((name + ~chords.stutter(r).[n / 3])).postln});
             // End of code to display the Chord functions in the Post window.
-            (~chords.stutter(r).flat + [0].stutter(3)).[n];
+            (~chords.stutter(r).flat + transpositions).[n];
     }),
     \dyn, 1,
     \amp, Pseq([0.25, 0.5, 1] * 0.25, inf),
@@ -54,6 +66,7 @@ var arpeggio = 0.025;
 
 
 (
+// A version of ~makeScale that also builds the ~chords array;
 ~makeScale = {
     |r|
     var scale = [0];
