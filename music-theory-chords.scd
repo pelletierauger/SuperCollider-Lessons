@@ -1,8 +1,8 @@
 
 
 
-   ░█░█░░█░█░█░░█░█░░█░█░█░
-   c d ef g a bc d ef g a b
+░█░█░░█░█░█░░█░█░░█░█░█░
+c d ef g a bc d ef g a b
 c  x...x..x
 d    x..x...x
 e      x..x...x
@@ -22,28 +22,29 @@ var a = 1; ~chord = ~two_oct[a+0,a+2..a+4];
 
 (
 var key = ~toMidi.("C4");
-var repeats = 1; // repeats must be a positive integer.
-var transpositions = [0].stutter(3);
+var repeats = 4; // repeats must be a positive integer.
+var transpositions = [0, 12].stutter(3);
 var noteIndex = Pseq((0..(21*repeats-1)), inf).asStream;
 var keyIndex = Pseq((0..6), inf).asStream;
 var arpeggio = 0.025;
 var r = repeats;
+var displayChordFunctions = {
+    | n |
+    var names = ["I", "II", "III", "IV", "V", "VI", "VII"];
+    var c = ~chords.stutter(r).[n/3];
+    var name = if (c[1] - c[0] == 4, {names[n/3/r]}, {names[n/3/r].toLower});
+    var pad = 12;
+    if (c[2] - c[0] == 6, {name = name ++ "°"; pad = pad + 1});
+    name = ("Chord " ++ name).padRight(pad, string: " ");
+    if (n % (3*r) == 0, {((name + ~chords.stutter(r).[n / 3])).postln});
+};
 ~ascendingChords.stop;
 ~ascendingChords = Pbind(
     \type, \pianoEvent,
     \dur, Pseq([arpeggio, arpeggio, 2 - (arpeggio * 2)] * r.reciprocal, inf),
-    \num, key + FuncStream(
-        {
+    \num, key + FuncStream({
             var n = noteIndex.next;
-            // Code to display the Chord functions in the Post window.
-            var names = ["I", "II", "III", "IV", "V", "VI", "VII"];
-            var c = ~chords.stutter(r).[n/3];
-            var name = if (c[1] - c[0] == 4, {names[n/3/r]}, {names[n/3/r].toLower});
-            var pad = 12;
-            if (c[2] - c[0] == 6, {name = name ++ "°"; pad = pad + 1});
-            name = ("Chord " ++ name).padRight(pad, string: " ");
-            if (n % (3*r) == 0, {((name + ~chords.stutter(r).[n / 3])).postln});
-            // End of code to display the Chord functions in the Post window.
+            displayChordFunctions.(n);
             (~chords.stutter(r).flat + transpositions).[n];
     }),
     \dyn, 1,
