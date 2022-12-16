@@ -141,6 +141,7 @@ var transpositions = [0, 0].stutter(3);
 var noteIndex = Pseq((0..(21*repeats-1)), inf).asStream;
 var keyIndex = Pseq((0..6), inf).asStream;
 var arpeggio = 0.025;
+// var arpeggio = 2/3;
 var r = repeats;
 var displayChordFunctions = {
     | n |
