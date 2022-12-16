@@ -116,8 +116,8 @@ notes.postln;
 // What is a chord? How do we build one?
 // -----------------------------------------------------------------------------
 
-░█░█░░█░█░█░░█░█░░█░█░█░
-c d ef g a bc d ef g a b
+   ░█░█░░█░█░█░░█░█░░█░█░█░
+   c d ef g a bc d ef g a b
 c  x...x..x
 d    x..x...x
 e      x..x...x
