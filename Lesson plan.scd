@@ -18,3 +18,19 @@ SuperCollider lesson plan
   - Frequency modulation (FM).
   - Modal synthesis (physical modeling).
 - Strategies for composing and performing complete pieces.
+
+
+//
+
+
+After January
+Granular
+Samples
+Rhythm
+Visuals ?
+Recording + creating a live looper, live sampling.
+
+
+
+
+
