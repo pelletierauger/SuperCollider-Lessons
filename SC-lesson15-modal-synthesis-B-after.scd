@@ -113,13 +113,13 @@ x.set(\strike_level, 0.4);
 ~input.free;
 
 // Change the timbre quality of the percussive through various parameters.
-x.set(\strength, 0.289);
-x.set(\damp, 0.2);
-x.set(\pit, 40);
-x.set(\bright, 0.34);
+x.set(\strength, 0.389);
+x.set(\damp, 0.7);
+x.set(\pit, 30);
+x.set(\bright, 0.4);
 
 // Mallet type. Controls the type of percussive noise produced by the STRIKE generator.
-x.set(\mallet, 0.25);
+x.set(\mallet, 0.35);
 
 // Set multiple parameters simultaneously.
 x.set(\pit, 40, \mallet, 0.25, \bright, 0.34, \strength, 0.4, \damp, 0.5);
@@ -153,7 +153,7 @@ x.set(\pit, ~toMidi.("A6"), \geom, 0.75, \bright, 0.75, \damp, 0.3);
 ~input = {
     var t = Impulse.kr(4);
     var env = EnvGen.kr(Env([0,1,0], [0.01, 0.5], ['lin', -8]), gate: t);
-    var sig = MiBraids.ar(pitch: ~toMidi.("A3"), timbre: 0.5, color: 0.5, model: 1) * env;
+    var sig = MiPlaits.ar(pitch: ~toMidi.("A2"), timbre: 0.5, color: 0.5, model: 1) * env;
     Out.ar(~strikeBus, sig)}.play;
 )
 
@@ -179,11 +179,14 @@ t = TempoClock.new(1).permanent_(true);
     var tonic = ~toMidi.("A1");
     var melody = Pseq([0, -2], inf).asStream;
     {
-        x.set(\pit, tonic + melody);
+        x.set(\pit, tonic + melody.next);
         4.wait;
     }.loop;
 }.start(t, quant: [1]);
 )
+
+~melody = Pseq([0, -2], inf).asStream;
+12 + ~melody
 
 // Low bowing (formerly the low resonant thud).
 x.set(\geom, 0.375, \bright, 0.5, \damp, 0.8);
@@ -264,3 +267,78 @@ Below is a chord progression played with geom and a Demand rate pattern.
 // Two different ways to generate the same pattern used in the bright variable.
 (0.1,0.2..0.8)
 (1..8) * 0.1
+
+
+
+
+//
+
+// SuperCollider Course
+// Fall 2022 - Winter 2023
+// Lesson No. 9 --- Granular Synthesis A
+
+~path = "/Users/guillaumepelletier/Desktop/Dropbox/Art/p5/SuperCollider-Lessons/classical-guitar-chord.wav"
+~chordStereo = Buffer.read(s, ~path);
+
+// ---------------------------------------------------------------------
+// Granular synthesis with a Pbind.
+// ---------------------------------------------------------------------
+
+// Our basic Pbind.
+(
+SynthDef(\samplerStereo, {
+    arg buf, rate = 1, spos = 0, pan = 0, amp = 1, atk = 0.1, rel = 0.1, out = 0;
+    var env = EnvGen.kr(Env.new([0, 1, 0], [atk, rel]), doneAction: 2);
+    var sig = PlayBuf.ar(2, buf, rate * BufRateScale.ir(buf), startPos: BufFrames.ir(buf)*spos);
+    sig = Pan2.ar(sig, pan) * env * amp;
+    Out.ar(out, sig);
+}).add;
+)
+
+// The shape of a single grain.
+(
+Synth.new(\samplerStereo, [
+    \buf, ~chordStereo,
+    \spos, 0,
+    \atk, 0.001,
+    \rel, 3,
+    \rate, 1,
+    \amp, 2,
+    \out, ~strikeBus
+]);
+)
+x.set(\pit, ~toMidi.("Ab4"));
+x.set(\damp, 0.5);
+
+// An infinite stream of grains.
+(
+~granular.stop;
+~granular = Pbind(
+    \instrument, \samplerStereo,
+    \buf, ~chordStereo,
+    \dur, 1 / 64,
+    // \spos, 0.6 + Pwhite(-0.01, 0.01, inf) + Pseq([Pseries(0,0.1/500,1500)],inf),
+    \spos, 0.3,
+    \atk, 0.5,
+    \rel, 0.5,
+    // \rate, [0.5, 1],
+    \rate, 1,
+    \pan, 0,
+    \amp, 2,
+    \out, ~strikeBus
+).play();
+)
+
+// An alternative version of the SynthDef
+// for scanning through the sample with MouseX.
+(
+SynthDef(\samplerStereo, {
+    arg buf, rate = 1, spos = 0, pan = 0, amp = 1, atk = 0.1, rel = 0.1, out = 0;
+    var env = EnvGen.kr(Env.new([0, 1, 0], [atk, rel]*0.1), doneAction: 2);
+    var scanX = MouseX.kr(0, 1);
+    var sig = PlayBuf.ar(2, buf, rate * BufRateScale.ir(buf), startPos: BufFrames.ir(buf)*scanX);
+    sig = Pan2.ar(sig, pan) * env * amp;
+    // scanX.poll;
+    Out.ar(out, sig);
+}).add;
+)
